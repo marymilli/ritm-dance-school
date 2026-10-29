@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id          String         @id @default(cuid())
+  name        String
+  direction   String
+  experience  Int
+  sessions    ClassSession[]
+  createdAt   DateTime       @default(now())
+}
+
+model ClassSession {
+  id          String    @id @default(cuid())
+  direction   String
+  teacherId   String
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
+  startsAt    DateTime
+  durationMin Int
+  level       String
+  room        String
+  capacity    Int
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bookings    Booking[]
+
+  @@index([startsAt])
+}
+
+model Booking {
+  id              String       @id @default(cuid())
+  number          String       @unique
+  classSessionId  String
+  classSession    ClassSession @relation(fields: [classSessionId], references: [id])
+  name            String
+  phone           String
+  phoneNormalized String
+  email           String?
+  comment         String?
+  consent         Boolean
+  status          String       @default("NEW")
+  requestKey      String       @unique
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  notification    Notification?
+
+  @@unique([classSessionId, phoneNormalized])
+  @@index([status])
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  bookingId    String   @unique
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+  payload      String
+  status       String   @default("PENDING")
+  attempts     Int      @default(0)
+  lastError    String?
+  failNextDemo Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  csrfToken String
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+model DemoSetting {
+  id                   Int      @id @default(1)
+  failNextNotification Boolean  @default(false)
+  updatedAt            DateTime @updatedAt
+}

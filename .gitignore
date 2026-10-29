@@ -10,6 +10,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -28,6 +30,8 @@ yarn-error.log*
 
 # local environment
 .env*
+prisma/*.db
+prisma/*.db-journal
 
 # deployment and generated files
 .vercel
@@ -36,3 +40,9 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+# Safe configuration template
+!.env.example
+
+# SQLite transaction sidecars
+prisma/*.db-wal
+prisma/*.db-shm
